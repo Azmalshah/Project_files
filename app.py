@@ -76,13 +76,29 @@ data_paths = [
     'Preprocessed_files/cleaned_hackathons.csv',
     '../Preprocessed_files/cleaned_hackathons.csv'
 ]
-hackathon_path = next((p for p in data_paths if os.path.exists(p)), data_paths[-1])
+hackathon_path = next((p for p in data_paths if os.path.exists(p)), None)
+if hackathon_path is None:
+    st.error("Error: Could not find cleaned_hackathons.csv file. Please ensure data files are in Preprocessed_files/ directory.")
+    st.stop()
+
 job_path = hackathon_path.replace('cleaned_hackathons.csv', 'cleaned_jobs.csv')
 internship_path = hackathon_path.replace('cleaned_hackathons.csv', 'cleaned_internship.csv')
-scraped_internship_path = os.path.join(current_dir, '..', 'scraped_internships.csv') if os.path.exists(os.path.join(current_dir, '..', 'scraped_internships.csv')) else '../scraped_internships.csv'
 
-hackathon_data = pd.read_csv(hackathon_path)
-job_data = pd.read_csv(job_path)
+# Try multiple paths for scraped_internships.csv
+scraped_paths = [
+    os.path.join(current_dir, 'scraped_internships.csv'),
+    os.path.join(current_dir, '..', 'scraped_internships.csv'),
+    'scraped_internships.csv',
+    '../scraped_internships.csv'
+]
+scraped_internship_path = next((p for p in scraped_paths if os.path.exists(p)), scraped_paths[0])
+
+try:
+    hackathon_data = pd.read_csv(hackathon_path)
+    job_data = pd.read_csv(job_path)
+except Exception as e:
+    st.error(f"Error loading data files: {str(e)}")
+    st.stop()
 
 # Streamlit app
 st.title("Data Visualizations for Hackathons and Jobs")
@@ -340,7 +356,11 @@ import plotly.express as px
 from wordcloud import WordCloud
 
 # Load the dataset
-internship_data = pd.read_csv(internship_path)
+try:
+    internship_data = pd.read_csv(internship_path)
+except Exception as e:
+    st.error(f"Error loading internship data: {str(e)}")
+    st.stop()
 
 # Preprocessing steps
 # Convert date columns to datetime format
@@ -455,7 +475,12 @@ import pandas as pd
 import plotly.express as px
 
 # Load the dataset
-internship_Scraped_data = pd.read_csv(scraped_internship_path)
+try:
+    internship_Scraped_data = pd.read_csv(scraped_internship_path)
+except Exception as e:
+    st.warning(f"Could not load scraped_internships.csv: {str(e)}. Some visualizations may not be available.")
+    # Create empty dataframe with required columns to prevent errors
+    internship_Scraped_data = pd.DataFrame(columns=['Impressions', 'Applied', 'Application Deadline'])
 
 # Streamlit app
 st.title("Internship Data Visualizations")
