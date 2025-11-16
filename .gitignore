@@ -38,8 +38,9 @@ wheels/
 .DS_Store
 Thumbs.db
 
-# Streamlit
-.streamlit/
+# Streamlit (allow config.toml for deployment)
+.streamlit/secrets.toml
+.streamlit/credentials.toml
 
 # Data files (optional - uncomment if you don't want to commit large CSV files)
 # *.csv
